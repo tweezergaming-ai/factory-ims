@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORMA — Factory Inventory System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --surface2: #f9f7f4;
+  --border: #e2ddd7;
+  --border2: #ccc8c0;
+  --accent: #c0622a;
+  --accent-light: #fdf0e8;
+  --accent2: #2a6b4a;
+  --accent2-light: #e8f4ed;
+  --text: #1a1714;
+  --text2: #4a453f;
+  --muted: #8a837a;
+  --warn: #b45309;
+  --warn-light: #fef3c7;
+  --danger: #991b1b;
+  --danger-light: #fee2e2;
+  --success: #166534;
+  --success-light: #dcfce7;
+  --blue: #1d4ed8;
+  --blue-light: #dbeafe;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --font-serif: 'DM Serif Display', serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-sans: 'DM Sans', sans-serif;
+  --radius: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* HEADER */
+header {
+  background: var(--text);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: #fff;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-badge {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#hdr-clock {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.5);
+}
+
+/* APP LAYOUT */
+.app { display: flex; min-height: calc(100vh - 56px); }
+
+/* SIDEBAR */
+.sidebar {
+  width: 230px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-section { padding: 1.25rem 0 0.5rem; }
+
+.sidebar-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 1.25rem;
+  margin-bottom: 0.3rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 1.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text2);
+  transition: all 0.12s;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+
+.nav-item.active {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+/* MAIN */
+.main { flex: 1; padding: 2rem 2rem 3rem; overflow-y: auto; min-width: 0; }
+
+/* PAGE TITLE */
+.page-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--text);
+  line-height: 1;
+}
+
+.page-title small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+
+.btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #a8511f; }
+.btn-success { background: var(--accent2); color: #fff; }
+.btn-success:hover { background: #1f5438; }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover { background: #1a44c8; }
+.btn-outline { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-outline:hover { background: var(--surface2); }
+.btn-danger-soft { background: var(--danger-light); color: var(--danger); border: 1px solid #fca5a5; }
+.btn-danger-soft:hover { background: #fecaca; }
+.btn-sm { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
+
+/* STATS CARDS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.875rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.35s ease both;
+}
+
+.stat-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+.stat-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+.stat-value { font-family: var(--font-serif); font-size: 1.9rem; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+
+.search-wrap::before {
+  content: '⌕';
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(192,98,42,0.08); }
+.search-input::placeholder { color: var(--muted); }
+
+.filter-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select:focus { border-color: var(--accent); }
+
+/* TABLE */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; }
+
+thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+
+th {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+th:hover { color: var(--accent); }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  animation: fadeUp 0.3s ease both;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+
+td { padding: 0.8rem 1rem; font-size: 0.84rem; vertical-align: middle; }
+
+.item-name { font-weight: 600; color: var(--text); }
+.item-sku { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+
+/* BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.badge-ok { background: var(--success-light); color: var(--success); }
+.badge-low { background: var(--warn-light); color: var(--warn); }
+.badge-critical { background: var(--danger-light); color: var(--danger); }
+.badge-blue { background: var(--blue-light); color: var(--blue); }
+.badge-neutral { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.badge-orange { background: var(--accent-light); color: var(--accent); }
+.badge-green { background: var(--accent2-light); color: var(--accent2); }
+
+/* STOCK BAR */
+.stock-cell { min-width: 140px; }
+.stock-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+.stock-bar-bg { flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.stock-bar { height: 5px; border-radius: 99px; transition: width 0.5s ease; }
+.stock-qty { font-family: var(--font-mono); font-size: 0.75rem; min-width: 36px; text-align: right; font-weight: 500; }
+
+/* CATEGORY CHIP */
+.cat-chip {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 0.72rem;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,23,20,0.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  width: 580px;
+  max-width: 95vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  transform: scale(0.97) translateY(8px);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+
+.modal-title { font-family: var(--font-serif); font-size: 1.4rem; }
+
+.modal-close {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.12s;
+}
+.modal-close:hover { background: var(--danger-light); color: var(--danger); border-color: #fca5a5; }
+
+.modal-body { padding: 1.5rem; }
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+}
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 0; }
+.form-group.full { grid-column: 1 / -1; }
+
+.form-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.02em;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(192,98,42,0.08);
+  background: var(--surface);
+}
+.form-textarea { resize: vertical; min-height: 70px; }
+
+/* SECTION DIVIDER */
+.section-div {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+  margin: 1.5rem 0 1rem;
+}
+
+/* PAGE SECTIONS */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* TABS */
+.tab-bar {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.5rem;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* SUB TABS CONTENT */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ALERTS */
+.alert-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--danger);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.3s ease both;
+}
+
+.alert-card.warn { border-left-color: var(--warn); }
+.alert-card.ok { border-left-color: var(--success); }
+
+.alert-left { display: flex; align-items: center; gap: 1rem; }
+.alert-icon { font-size: 1.5rem; }
+.alert-name { font-weight: 600; font-size: 0.9rem; }
+.alert-detail { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+/* BOM TABLE */
+.bom-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.bom-row .form-input { flex: 1; }
+.bom-qty { width: 80px; flex-shrink: 0; }
+.bom-unit { width: 80px; flex-shrink: 0; }
+.bom-del { background: var(--danger-light); border: 1px solid #fca5a5; color: var(--danger); border-radius: 4px; padding: 0.3rem 0.5rem; cursor: pointer; font-size: 0.8rem; flex-shrink: 0; }
+
+/* PRODUCTION ORDER CARD */
+.order-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  margin-bottom: 0.875rem;
+  animation: fadeUp 0.3s ease both;
+}
+
+.order-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.875rem; }
+.order-title { font-family: var(--font-serif); font-size: 1.1rem; }
+.order-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.order-materials { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+.material-tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0.2rem 0.5rem; font-size: 0.72rem; color: var(--text2); }
+
+/* SUPPLIER CARD */
+.supplier-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  animation: fadeUp 0.3s ease both;
+}
+
+.supplier-name { font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 0.3rem; }
+.supplier-meta { font-size: 0.78rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.supplier-meta span { display: flex; align-items: center; gap: 0.25rem; }
+
+.suppliers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+/* REPORTS */
+.reports-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+.chart-title { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.25rem; }
+
+.bar-chart-h { display: flex; flex-direction: column; gap: 0.6rem; }
+.bar-h-row { display: flex; align-items: center; gap: 0.75rem; }
+.bar-h-label { font-size: 0.72rem; color: var(--text2); min-width: 110px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-h-bg { flex: 1; height: 20px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.bar-h-fill { height: 20px; border-radius: 3px; display: flex; align-items: center; padding-left: 0.5rem; font-family: var(--font-mono); font-size: 0.62rem; color: #fff; font-weight: 500; transition: width 0.6s ease; min-width: 2px; }
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.84rem;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-key { color: var(--text2); }
+.summary-val { font-family: var(--font-mono); font-weight: 500; }
+
+/* DONUT */
+.donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
+.legend { flex: 1; }
+.legend-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+.legend-item:last-child { border-bottom: none; }
+.legend-color { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.legend-name { flex: 1; color: var(--text2); }
+.legend-count { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+.empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.empty-msg { font-size: 0.9rem; margin-bottom: 0.5rem; }
+.empty-sub { font-size: 0.8rem; opacity: 0.7; }
+
+/* TABLE FOOTER */
+.table-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  background: var(--surface2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* TOASTER */
+.toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast {
+  background: var(--text);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  box-shadow: var(--shadow-md);
+  animation: slideIn 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 320px;
+}
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+@keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .stats-grid { grid-template-columns: repeat(3,1fr); }
+  .reports-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Forma
+    <div class="logo-sub">
+      <span>Factory Inventory System</span>
+      <span>Modular Furniture Mfg.</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge" onclick="showPage('alerts')">
+      🔔 <span id="hdr-alert-count">0</span> Alerts
+    </div>
+    <div id="hdr-clock"></div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Inventory</div>
+      <div class="nav-item active" onclick="showPage('materials')">
+        <span class="nav-icon">🪵</span> Raw Materials
+      </div>
+      <div class="nav-item" onclick="showPage('finished')">
+        <span class="nav-icon">🪑</span> Finished Goods
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Production</div>
+      <div class="nav-item" onclick="showPage('bom')">
+        <span class="nav-icon">📋</span> Bill of Materials
+      </div>
+      <div class="nav-item" onclick="showPage('orders')">
+        <span class="nav-icon">🏭</span> Production Orders
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Management</div>
+      <div class="nav-item" onclick="showPage('suppliers')">
+        <span class="nav-icon">🚚</span> Suppliers
+      </div>
+      <div class="nav-item" onclick="showPage('alerts')">
+        <span class="nav-icon">🔔</span> Alerts
+        <span class="nav-badge" id="sidebar-alert-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('reports')">
+        <span class="nav-icon">📊</span> Reports
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div>FORMA v2.0</div>
+      <div id="sb-date"></div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ═══ RAW MATERIALS PAGE ═══ -->
+    <div id="page-materials" class="page-section active">
+      <div class="page-hdr">
+        <div class="page-title"><small>Inventory / Raw Materials</small>Materials & Hardware</div>
+        <div class="btn-group">
+          <button class="btn btn-outline" onclick="exportCSV()">↓ Export CSV</button>
+          <button class="btn btn-primary" onclick="openItemModal()">+ Add Material</button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="mat-stats"></div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input class="search-input" type="text" id="mat-search" placeholder="Search by name, SKU or category…" oninput="renderMaterials()">
+        </div>
+        <select class="filter-select" id="mat-filter-cat" onchange="renderMaterials()">
+          <option value="">All Categories</option>
+        </select>
+        <select class="filter-select" id="mat-filter-status" onchange="renderMaterials()">
+          <option value="">All Status</option>
+          <option value="ok">In Stock</option>
+          <option value="low">Low Stock</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="matSort('sku')">SKU ↕</th>
+                <th onclick="matSort('name')">Material / Item ↕</th>
+                <th onclick="matSort('category')">Category ↕</th>
+                <th>Unit</th>
+                <th onclick="matSort('quantity')">Stock ↕</th>
+                <th onclick="matSort('supplier')">Supplier</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="mat-tbody"></tbody>
+          </table>
+        </div>
+        <div id="mat-empty" class="empty" style="display:none">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-msg">No materials match your search.</div>
+        </div>
+        <div class="table-footer">
+          <span id="mat-count-label">— items</span>
+          <span>Last updated: <span id="mat-last-updated">—</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FINISHED GOODS PAGE ═══ -->
+    <div id="page-finished" class="page-section">
+      <div class="page-hdr">
+        <div class="page-title"><small>Inventory / Finished Goods</small>Furniture Products</div>
+        <button class="btn btn-success" onclick="openFinishedModal()">+ Add Product</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input class="search-input" type="text" id="fg-search" placeholder="Search products…" oninput="renderFinished()">
+        </div>
+        <select class="filter-select" id="fg-filter-cat" onchange="renderFinished()">
+          <option value="">All Types</option>
+        </select>
+      </div>
+
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Product Name</th>
+                <th>Type</th>
+                <th>In Stock</th>
+                <th>Unit Price (₹)</th>
+                <th>Linked BOM</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fg-tbody"></tbody>
+          </table>
+        </div>
+        <div id="fg-empty" class="empty" style="display:none">
+          <div class="empty-icon">🪑</div>
+          <div class="empty-msg">No finished goods added yet.</div>
+          <div class="empty-sub">Add products or generate them from production orders.</div>
+        </div>
+        <div class="table-footer"><span id="fg-count-label">— products</span></div>
+      </div>
+    </div>
+
+    <!-- ═══ BOM PAGE ═══ -->
+    <div id="page-bom" class="page-section">
+      <div class="page-hdr">
+        <div class="page-title"><small>Production / BOM</small>Bill of Materials</div>
+        <button class="btn btn-primary" onclick="openBOMModal()">+ New BOM</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input class="search-input" type="text" id="bom-search" placeholder="Search BOMs…" oninput="renderBOMs()">
+        </div>
+      </div>
+
+      <div id="bom-list"></div>
+      <div id="bom-empty" class="empty" style="display:none">
+        <div class="empty-icon">📋</div>
+        <div class="empty-msg">No Bill of Materials created yet.</div>
+        <div class="empty-sub">Create a BOM to define materials needed for each furniture product.</div>
+      </div>
+    </div>
+
+    <!-- ═══ PRODUCTION ORDERS PAGE ═══ -->
+    <div id="page-orders" class="page-section">
+      <div class="page-hdr">
+        <div class="page-title"><small>Production / Orders</small>Production Orders</div>
+        <button class="btn btn-blue" onclick="openOrderModal()">+ New Order</button>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab active" onclick="filterOrders('all', this)">All</div>
+        <div class="tab" onclick="filterOrders('pending', this)">Pending</div>
+        <div class="tab" onclick="filterOrders('in-progress', this)">In Progress</div>
+        <div class="tab" onclick="filterOrders('completed', this)">Completed</div>
+      </div>
+
+      <div id="order-list"></div>
+      <div id="order-empty" class="empty" style="display:none">
+        <div class="empty-icon">🏭</div>
+        <div class="empty-msg">No production orders yet.</div>
+      </div>
+    </div>
+
+    <!-- ═══ SUPPLIERS PAGE ═══ -->
+    <div id="page-suppliers" class="page-section">
+      <div class="page-hdr">
+        <div class="page-title"><small>Management</small>Suppliers</div>
+        <button class="btn btn-primary" onclick="openSupplierModal()">+ Add Supplier</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input class="search-input" type="text" id="sup-search" placeholder="Search suppliers…" oninput="renderSuppliers()">
+        </div>
+      </div>
+
+      <div class="suppliers-grid" id="suppliers-grid"></div>
+      <div id="sup-empty" class="empty" style="display:none">
+        <div class="empty-icon">🚚</div>
+        <div class="empty-msg">No suppliers added yet.</div>
+      </div>
+    </div>
+
+    <!-- ═══ ALERTS PAGE ═══ -->
+    <div id="page-alerts" class="page-section">
+      <div class="page-hdr">
+        <div class="page-title"><small>Management</small>Stock Alerts</div>
+        <button class="btn btn-outline" onclick="renderAlerts()">↻ Refresh</button>
+      </div>
+      <div id="alerts-container"></div>
+    </div>
+
+    <!-- ═══ REPORTS PAGE ═══ -->
+    <div id="page-reports" class="page-section">
+      <div class="page-hdr">
+        <div class="page-title"><small>Management</small>Reports & Analytics</div>
+      </div>
+      <div class="reports-grid" id="reports-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ITEM MODAL (Add/Edit Material) -->
+<div class="modal-overlay" id="modal-item">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="item-modal-title">Add Material</div>
+      <button class="modal-close" onclick="closeModal('modal-item')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="item-edit-id">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">SKU / Code *</label>
+          <input class="form-input" id="i-sku" placeholder="RM-001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="i-cat">
+            <option value="Wood & Board">Wood & Board</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Laminates & Veneers">Laminates & Veneers</option>
+            <option value="Handles & Knobs">Handles & Knobs</option>
+            <option value="Channels & Runners">Channels & Runners</option>
+            <option value="Dowels & Connectors">Dowels & Connectors</option>
+            <option value="Minifixtures & Cam Locks">Minifixtures & Cam Locks</option>
+            <option value="Fasteners & Nails">Fasteners & Nails</option>
+            <option value="Wires & Electrical">Wires & Electrical</option>
+            <option value="Adhesives & Chemicals">Adhesives & Chemicals</option>
+            <option value="Packaging">Packaging</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Material Name *</label>
+          <input class="form-input" id="i-name" placeholder="e.g. 18mm Plywood, Soft Close Hinge">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity *</label>
+          <input class="form-input" type="number" id="i-qty" min="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <select class="form-select" id="i-unit">
+            <option value="pcs">pcs</option>
+            <option value="sheets">sheets</option>
+            <option value="kg">kg</option>
+            <option value="mtr">mtr</option>
+            <option value="ltr">ltr</option>
+            <option value="box">box</option>
+            <option value="roll">roll</option>
+            <option value="set">set</option>
+            <option value="pair">pair</option>
+            <option value="nos">nos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Low Stock Threshold</label>
+          <input class="form-input" type="number" id="i-threshold" min="0" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Storage Location</label>
+          <input class="form-input" id="i-location" placeholder="Rack A-3">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit Cost (₹)</label>
+          <input class="form-input" type="number" id="i-price" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <select class="form-select" id="i-supplier">
+            <option value="">— Select Supplier —</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" id="i-notes" placeholder="Any additional notes…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-item')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save Material</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINISHED GOODS MODAL -->
+<div class="modal-overlay" id="modal-fg">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="fg-modal-title">Add Finished Product</div>
+      <button class="modal-close" onclick="closeModal('modal-fg')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fg-edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">SKU *</label><input class="form-input" id="fg-sku" placeholder="FG-001"></div>
+        <div class="form-group">
+          <label class="form-label">Product Type *</label>
+          <select class="form-select" id="fg-type">
+            <option>Wardrobe</option><option>Kitchen Cabinet</option><option>TV Unit</option>
+            <option>Shoe Rack</option><option>Bookshelf</option><option>Study Table</option>
+            <option>Bed Frame</option><option>Side Table</option><option>Chest of Drawers</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group full"><label class="form-label">Product Name *</label><input class="form-input" id="fg-name" placeholder="e.g. 3-Door Sliding Wardrobe"></div>
+        <div class="form-group"><label class="form-label">Quantity in Stock</label><input class="form-input" type="number" id="fg-qty" min="0" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Unit Price (₹)</label><input class="form-input" type="number" id="fg-price" placeholder="0"></div>
+        <div class="form-group full">
+          <label class="form-label">Linked BOM</label>
+          <select class="form-select" id="fg-bom"><option value="">— None —</option></select>
+        </div>
+        <div class="form-group full"><label class="form-label">Description</label><textarea class="form-textarea" id="fg-desc" placeholder="Product description…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-fg')">Cancel</button>
+      <button class="btn btn-success" onclick="saveFG()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOM MODAL -->
+<div class="modal-overlay" id="modal-bom">
+  <div class="modal" style="width:640px">
+    <div class="modal-header">
+      <div class="modal-title" id="bom-modal-title">New Bill of Materials</div>
+      <button class="modal-close" onclick="closeModal('modal-bom')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bom-edit-id">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">BOM Name / Product *</label><input class="form-input" id="bom-name" placeholder="e.g. 3-Door Wardrobe Standard"></div>
+        <div class="form-group"><label class="form-label">Product Type</label><input class="form-input" id="bom-type" placeholder="e.g. Wardrobe"></div>
+        <div class="form-group"><label class="form-label">Dimensions</label><input class="form-input" id="bom-dims" placeholder="2400×600×2100 mm"></div>
+      </div>
+      <div class="section-div">Materials Required</div>
+      <div id="bom-items-list"></div>
+      <button class="btn btn-outline btn-sm" onclick="addBOMRow()" style="margin-top:.5rem">+ Add Material Row</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-bom')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBOM()">Save BOM</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTION ORDER MODAL -->
+<div class="modal-overlay" id="modal-order">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Production Order</div>
+      <button class="modal-close" onclick="closeModal('modal-order')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Order Name / Reference *</label><input class="form-input" id="ord-name" placeholder="e.g. PO-2025-001 — Sharma Residence"></div>
+        <div class="form-group">
+          <label class="form-label">Select BOM *</label>
+          <select class="form-select" id="ord-bom"><option value="">— Select BOM —</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Quantity to Produce</label><input class="form-input" type="number" id="ord-qty" min="1" value="1"></div>
+        <div class="form-group"><label class="form-label">Target Date</label><input class="form-input" type="date" id="ord-date"></div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="ord-status">
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" id="ord-notes" placeholder="Order notes…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-order')">Cancel</button>
+      <button class="btn btn-blue" onclick="saveOrder()">Create Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLIER MODAL -->
+<div class="modal-overlay" id="modal-supplier">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="sup-modal-title">Add Supplier</div>
+      <button class="modal-close" onclick="closeModal('modal-supplier')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sup-edit-id">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Supplier Name *</label><input class="form-input" id="s-name" placeholder="Company / Vendor name"></div>
+        <div class="form-group"><label class="form-label">Contact Person</label><input class="form-input" id="s-contact" placeholder="Name"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="s-phone" placeholder="+91 98765 43210"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="s-email" placeholder="vendor@example.com"></div>
+        <div class="form-group"><label class="form-label">City / Location</label><input class="form-input" id="s-city" placeholder="Mumbai"></div>
+        <div class="form-group full"><label class="form-label">Materials Supplied</label><input class="form-input" id="s-materials" placeholder="e.g. Plywood, Laminates, Hardware"></div>
+        <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-textarea" id="s-notes" placeholder="Payment terms, lead time, etc."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-supplier')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA STORE
+// ══════════════════════════════════════════════════
+function loadData(key, def) {
+  try { return JSON.parse(localStorage.getItem('forma_' + key)) || def; } catch { return def; }
+}
+function saveData(key, val) { localStorage.setItem('forma_' + key, JSON.stringify(val)); }
+
+let materials = loadData('materials', [
+  { id:1, sku:'RM-W01', name:'18mm BWR Plywood (8×4 ft)', category:'Wood & Board', quantity:85, threshold:20, unit:'sheets', location:'Lumber Rack 1', price:1450, supplier:'ShreeWood Suppliers', notes:'Grade I' },
+  { id:2, sku:'RM-W02', name:'12mm MDF Board', category:'Wood & Board', quantity:12, threshold:15, unit:'sheets', location:'Lumber Rack 2', price:780, supplier:'ShreeWood Suppliers', notes:'' },
+  { id:3, sku:'RM-W03', name:'8mm HDF Board', category:'Wood & Board', quantity:40, threshold:10, unit:'sheets', location:'Lumber Rack 2', price:520, supplier:'ShreeWood Suppliers', notes:'' },
+  { id:4, sku:'RM-L01', name:'Sunmica Laminate — White Gloss', category:'Laminates & Veneers', quantity:30, threshold:10, unit:'sheets', location:'Laminate Store', price:320, supplier:'National Laminates', notes:'1mm, 8×4 ft' },
+  { id:5, sku:'RM-L02', name:'Sunmica Laminate — Teak Wood', category:'Laminates & Veneers', quantity:8, threshold:10, unit:'sheets', location:'Laminate Store', price:340, supplier:'National Laminates', notes:'1mm, 8×4 ft' },
+  { id:6, sku:'RM-L03', name:'Anti-scratch Laminate — Grey Matt', category:'Laminates & Veneers', quantity:22, threshold:8, unit:'sheets', location:'Laminate Store', price:480, supplier:'National Laminates', notes:'' },
+  { id:7, sku:'RM-H01', name:'Concealed Hinge 35mm (Soft Close)', category:'Hardware', quantity:420, threshold:100, unit:'pcs', location:'Hardware Bin 1', price:38, supplier:'Hettich Dealers', notes:'' },
+  { id:8, sku:'RM-H02', name:'Channel Drawer Slides 18" (Full Ext.)', category:'Channels & Runners', quantity:65, threshold:40, unit:'pair', location:'Hardware Bin 2', price:185, supplier:'Hettich Dealers', notes:'' },
+  { id:9, sku:'RM-H03', name:'Channel Drawer Slides 24" (Full Ext.)', category:'Channels & Runners', quantity:18, threshold:30, unit:'pair', location:'Hardware Bin 2', price:210, supplier:'Hettich Dealers', notes:'' },
+  { id:10, sku:'RM-K01', name:'Aluminium Handle — 128mm C-C', category:'Handles & Knobs', quantity:280, threshold:60, unit:'pcs', location:'Handle Rack', price:65, supplier:'Modern Hardware Co.', notes:'Matt Black Finish' },
+  { id:11, sku:'RM-K02', name:'Aluminium Handle — 256mm C-C', category:'Handles & Knobs', quantity:190, threshold:50, unit:'pcs', location:'Handle Rack', price:90, supplier:'Modern Hardware Co.', notes:'Matt Black Finish' },
+  { id:12, sku:'RM-K03', name:'Knob Round — Brushed Gold', category:'Handles & Knobs', quantity:3, threshold:50, unit:'pcs', location:'Handle Rack', price:45, supplier:'Modern Hardware Co.', notes:'' },
+  { id:13, sku:'RM-D01', name:'Wooden Dowel 8mm×40mm', category:'Dowels & Connectors', quantity:2500, threshold:500, unit:'pcs', location:'Small Parts Bin 1', price:1.5, supplier:'Fasteners Plus', notes:'' },
+  { id:14, sku:'RM-M01', name:'Cam Lock & Disc Set', category:'Minifixtures & Cam Locks', quantity:800, threshold:200, unit:'set', location:'Small Parts Bin 2', price:8, supplier:'Fasteners Plus', notes:'M6 bolt included' },
+  { id:15, sku:'RM-M02', name:'Corner Bracket L-Angle 50mm', category:'Minifixtures & Cam Locks', quantity:350, threshold:100, unit:'pcs', location:'Small Parts Bin 2', price:12, supplier:'Fasteners Plus', notes:'' },
+  { id:16, sku:'RM-N01', name:'Finishing Nails 30mm (Box)', category:'Fasteners & Nails', quantity:25, threshold:10, unit:'box', location:'Fastener Store', price:85, supplier:'Fasteners Plus', notes:'500pcs/box' },
+  { id:17, sku:'RM-N02', name:'Wood Screws 35mm (Box)', category:'Fasteners & Nails', quantity:4, threshold:8, unit:'box', location:'Fastener Store', price:120, supplier:'Fasteners Plus', notes:'200pcs/box' },
+  { id:18, sku:'RM-E01', name:'LED Strip Light 5M (Warm White)', category:'Wires & Electrical', quantity:45, threshold:15, unit:'roll', location:'Electrical Store', price:380, supplier:'LightTech Supplies', notes:'12V, IP20' },
+  { id:19, sku:'RM-E02', name:'LED Driver 60W 12V', category:'Wires & Electrical', quantity:28, threshold:10, unit:'pcs', location:'Electrical Store', price:280, supplier:'LightTech Supplies', notes:'' },
+  { id:20, sku:'RM-A01', name:'Fevicol SR 998 (5 KG)', category:'Adhesives & Chemicals', quantity:8, threshold:5, unit:'kg', location:'Chem Store', price:650, supplier:'Asian Paints Dealers', notes:'White glue' },
+  { id:21, sku:'RM-A02', name:'Contact Adhesive (1 Ltr)', category:'Adhesives & Chemicals', quantity:2, threshold:6, unit:'ltr', location:'Chem Store', price:420, supplier:'Asian Paints Dealers', notes:'For laminate bonding' },
+  { id:22, sku:'RM-P01', name:'Bubble Wrap Roll (50 mtr)', category:'Packaging', quantity:6, threshold:3, unit:'roll', location:'Dispatch Area', price:850, supplier:'Pack & Go', notes:'' },
+]);
+
+let finishedGoods = loadData('finished', [
+  { id:1, sku:'FG-W01', name:'3-Door Sliding Wardrobe', type:'Wardrobe', quantity:2, price:45000, bom:1, desc:'2400×600×2100mm, Mirror centre panel' },
+  { id:2, sku:'FG-K01', name:'L-Shape Modular Kitchen', type:'Kitchen Cabinet', quantity:1, price:180000, bom:2, desc:'10 ft × 8 ft layout, Soft-close fittings' },
+  { id:3, sku:'FG-T01', name:'Wall-Mounted TV Unit 6ft', type:'TV Unit', quantity:3, price:22000, bom:0, desc:'With back panel & LED cove' },
+]);
+
+let boms = loadData('boms', [
+  { id:1, name:'3-Door Sliding Wardrobe Standard', type:'Wardrobe', dims:'2400×600×2100 mm', items:[
+    { materialSku:'RM-W01', materialName:'18mm BWR Plywood (8×4 ft)', qty:4, unit:'sheets' },
+    { materialSku:'RM-L01', materialName:'Sunmica Laminate — White Gloss', qty:3, unit:'sheets' },
+    { materialSku:'RM-H01', materialName:'Concealed Hinge 35mm (Soft Close)', qty:8, unit:'pcs' },
+    { materialSku:'RM-K01', materialName:'Aluminium Handle — 128mm C-C', qty:6, unit:'pcs' },
+    { materialSku:'RM-M01', materialName:'Cam Lock & Disc Set', qty:24, unit:'set' },
+    { materialSku:'RM-D01', materialName:'Wooden Dowel 8mm×40mm', qty:40, unit:'pcs' },
+  ]},
+  { id:2, name:'L-Shape Modular Kitchen Full Set', type:'Kitchen Cabinet', dims:'10ft × 8ft layout', items:[
+    { materialSku:'RM-W01', materialName:'18mm BWR Plywood (8×4 ft)', qty:12, unit:'sheets' },
+    { materialSku:'RM-L03', materialName:'Anti-scratch Laminate — Grey Matt', qty:10, unit:'sheets' },
+    { materialSku:'RM-H01', materialName:'Concealed Hinge 35mm (Soft Close)', qty:32, unit:'pcs' },
+    { materialSku:'RM-H02', materialName:'Channel Drawer Slides 18"', qty:12, unit:'pair' },
+    { materialSku:'RM-K01', materialName:'Aluminium Handle — 128mm C-C', qty:24, unit:'pcs' },
+    { materialSku:'RM-M01', materialName:'Cam Lock & Disc Set', qty:80, unit:'set' },
+    { materialSku:'RM-E01', materialName:'LED Strip Light 5M (Warm White)', qty:3, unit:'roll' },
+  ]},
+]);
+
+let orders = loadData('orders', [
+  { id:1, name:'PO-2025-001 — Sharma Residence', bom:1, bomName:'3-Door Sliding Wardrobe Standard', qty:2, date:'2025-03-15', status:'in-progress', notes:'Urgent delivery required.' },
+  { id:2, name:'PO-2025-002 — Patel Kitchen', bom:2, bomName:'L-Shape Modular Kitchen Full Set', qty:1, date:'2025-03-22', status:'pending', notes:'Client to confirm colour.' },
+  { id:3, name:'PO-2025-003 — Model Home Display', bom:1, bomName:'3-Door Sliding Wardrobe Standard', qty:3, date:'2025-02-28', status:'completed', notes:'' },
+]);
+
+let suppliers = loadData('suppliers', [
+  { id:1, name:'ShreeWood Suppliers', contact:'Ramesh Patel', phone:'+91 98234 56789', email:'ramesh@shreewood.com', city:'Ahmedabad', materials:'Plywood, MDF, HDF Boards', notes:'30 days credit. Lead time: 3 days.' },
+  { id:2, name:'National Laminates', contact:'Suresh Mehta', phone:'+91 93456 12345', email:'sales@nationallaminates.in', city:'Mumbai', materials:'Laminates, Veneers, Edge Bands', notes:'Minimum order 20 sheets.' },
+  { id:3, name:'Hettich Dealers', contact:'Ajay Kumar', phone:'+91 90000 11223', email:'ajay@hettichdealer.com', city:'Delhi', materials:'Hinges, Drawer Channels, Lifting Mechanisms', notes:'ISO Certified. 1 yr warranty.' },
+  { id:4, name:'Fasteners Plus', contact:'Vinod Shah', phone:'+91 87654 32109', email:'info@fastenersplus.com', city:'Surat', materials:'Cam Locks, Dowels, Screws, Nails, Brackets', notes:'Same day delivery available.' },
+  { id:5, name:'Modern Hardware Co.', contact:'Nilesh Joshi', phone:'+91 99887 66554', email:'nilesh@modernhardware.co', city:'Pune', materials:'Handles, Knobs, Pulls, Hinges', notes:'Custom finishes available.' },
+  { id:6, name:'LightTech Supplies', contact:'Priya Nair', phone:'+91 98700 23456', email:'priya@lighttech.in', city:'Bangalore', materials:'LED Strips, Drivers, Wiring Accessories', notes:'' },
+  { id:7, name:'Asian Paints Dealers', contact:'Mohan Das', phone:'+91 96543 21098', email:'mohan@apdealer.com', city:'Chennai', materials:'Adhesives, Primers, Polish, Edge Tape', notes:'Monthly billing.' },
+  { id:8, name:'Pack & Go', contact:'Ravi Sharma', phone:'+91 88009 77654', email:'ravi@packgo.in', city:'Surat', materials:'Bubble Wrap, Foam, Cardboard Boxes, Tape', notes:'Bulk discount available.' },
+]);
+
+let matSortCol = 'name', matSortDir = 1;
+let orderFilter = 'all';
+let nextMatId = Math.max(...materials.map(m=>m.id), 0) + 1;
+let nextFGId = Math.max(...finishedGoods.map(m=>m.id), 0) + 1;
+let nextBOMId = Math.max(...boms.map(m=>m.id), 0) + 1;
+let nextOrdId = Math.max(...orders.map(m=>m.id), 0) + 1;
+let nextSupId = Math.max(...suppliers.map(m=>m.id), 0) + 1;
+
+// ══════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════
+function getStatus(item) {
+  if (item.quantity === 0) return 'critical';
+  if (item.quantity <= (item.threshold || 0)) {
+    return item.quantity <= Math.floor((item.threshold||0)/2) ? 'critical' : 'low';
+  }
+  return 'ok';
+}
+const statusLabel = { ok:'In Stock', low:'Low Stock', critical:'Critical' };
+const statusColor = { ok:'var(--success)', low:'var(--warn)', critical:'var(--danger)' };
+const statusBgColor = { ok:'var(--success-light)', low:'var(--warn-light)', critical:'var(--danger-light)' };
+
+function toast(msg, type='') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='success'?'✓ ':type==='error'?'✗ ':'') + msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ══════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════
+function renderMatStats() {
+  const total = materials.length;
+  const critical = materials.filter(m => getStatus(m)==='critical').length;
+  const low = materials.filter(m => getStatus(m)==='low').length;
+  const cats = new Set(materials.map(m=>m.category)).size;
+  const totalVal = materials.reduce((s,m)=>s+(m.quantity*(m.price||0)),0);
+
+  document.getElementById('mat-stats').innerHTML = `
+    <div class="stat-card" style="animation-delay:.0s"><div class="stat-icon">📦</div><div class="stat-label">Total SKUs</div><div class="stat-value">${total}</div><div class="stat-sub">Unique materials</div></div>
+    <div class="stat-card" style="animation-delay:.05s"><div class="stat-icon">✅</div><div class="stat-label">In Stock</div><div class="stat-value" style="color:var(--success)">${total-critical-low}</div><div class="stat-sub">Healthy levels</div></div>
+    <div class="stat-card" style="animation-delay:.10s"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock</div><div class="stat-value" style="color:var(--warn)">${low}</div><div class="stat-sub">Reorder soon</div></div>
+    <div class="stat-card" style="animation-delay:.15s"><div class="stat-icon">🚨</div><div class="stat-label">Critical</div><div class="stat-value" style="color:var(--danger)">${critical}</div><div class="stat-sub">Immediate reorder</div></div>
+    <div class="stat-card" style="animation-delay:.20s"><div class="stat-icon">💰</div><div class="stat-label">Stock Value</div><div class="stat-value" style="font-size:1.4rem">₹${(totalVal/1000).toFixed(0)}K</div><div class="stat-sub">${cats} categories</div></div>
+  `;
+
+  const alertCount = critical + low;
+  document.getElementById('hdr-alert-count').textContent = alertCount;
+  document.getElementById('sidebar-alert-badge').textContent = alertCount;
+  document.getElementById('sidebar-alert-badge').style.background = alertCount > 0 ? 'var(--danger)' : 'var(--muted)';
+}
+
+// ══════════════════════════════════════════════════
+// MATERIALS TABLE
+// ══════════════════════════════════════════════════
+function refreshCategoryFilter() {
+  const cats = [...new Set(materials.map(m=>m.category))].sort();
+  const sel = document.getElementById('mat-filter-cat');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+}
+
+function refreshSupplierDropdown() {
+  const opts = '<option value="">— Select Supplier —</option>' + suppliers.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  document.getElementById('i-supplier').innerHTML = opts;
+}
+
+function getFilteredMaterials() {
+  const q = (document.getElementById('mat-search')?.value||'').toLowerCase();
+  const cat = document.getElementById('mat-filter-cat')?.value||'';
+  const status = document.getElementById('mat-filter-status')?.value||'';
+  return materials.filter(m => {
+    const mq = !q || m.name.toLowerCase().includes(q)||m.sku.toLowerCase().includes(q)||(m.category||'').toLowerCase().includes(q)||(m.supplier||'').toLowerCase().includes(q);
+    const mc = !cat || m.category===cat;
+    const ms = !status || getStatus(m)===status;
+    return mq&&mc&&ms;
+  }).sort((a,b)=>{
+    const va=a[matSortCol], vb=b[matSortCol];
+    return (typeof va==='number' ? (va-vb) : String(va||'').localeCompare(String(vb||''))) * matSortDir;
+  });
+}
+
+function renderMaterials() {
+  const data = getFilteredMaterials();
+  const maxQty = Math.max(...materials.map(m=>m.quantity),1);
+  const tbody = document.getElementById('mat-tbody');
+  const empty = document.getElementById('mat-empty');
+
+  document.getElementById('mat-count-label').textContent = `${data.length} of ${materials.length} items`;
+  document.getElementById('mat-last-updated').textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  if (!data.length) { tbody.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+
+  tbody.innerHTML = data.map((m,i)=>{
+    const s = getStatus(m);
+    const pct = Math.max(3, Math.round(m.quantity/maxQty*100));
+    const color = statusColor[s];
+    return `<tr style="animation-delay:${i*0.03}s">
+      <td class="item-sku">${m.sku}</td>
+      <td><div class="item-name">${m.name}</div>${m.location?`<div class="item-sku">${m.location}</div>`:''}</td>
+      <td><span class="cat-chip">${m.category}</span></td>
+      <td><span style="font-family:var(--font-mono);font-size:.72rem;color:var(--muted)">${m.unit||'pcs'}</span></td>
+      <td class="stock-cell">
+        <div class="stock-bar-wrap">
+          <div class="stock-bar-bg"><div class="stock-bar" style="width:${pct}%;background:${color}"></div></div>
+          <span class="stock-qty" style="color:${color}">${m.quantity}</span>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-top:2px">Min: ${m.threshold||0}</div>
+      </td>
+      <td style="font-size:.78rem;color:var(--text2)">${m.supplier||'—'}</td>
+      <td><span class="badge badge-${s}">${statusLabel[s]}</span></td>
+      <td>
+        <div style="display:flex;gap:.35rem">
+          <button class="btn btn-outline btn-sm" onclick="openItemModal(${m.id})">Edit</button>
+          <button class="btn btn-danger-soft btn-sm" onclick="deleteMaterial(${m.id})">Del</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function matSort(col) {
+  matSortDir = matSortCol===col ? matSortDir*-1 : 1;
+  matSortCol = col;
+  renderMaterials();
+}
+
+// ══════════════════════════════════════════════════
+// ITEM MODAL
+// ══════════════════════════════════════════════════
+let editItemId = null;
+
+function openItemModal(id=null) {
+  editItemId = id;
+  document.getElementById('item-modal-title').textContent = id ? 'Edit Material' : 'Add Material';
+  refreshSupplierDropdown();
+  if (id) {
+    const m = materials.find(x=>x.id===id);
+    document.getElementById('i-sku').value = m.sku;
+    document.getElementById('i-name').value = m.name;
+    document.getElementById('i-cat').value = m.category;
+    document.getElementById('i-qty').value = m.quantity;
+    document.getElementById('i-unit').value = m.unit||'pcs';
+    document.getElementById('i-threshold').value = m.threshold||0;
+    document.getElementById('i-location').value = m.location||'';
+    document.getElementById('i-price').value = m.price||0;
+    document.getElementById('i-supplier').value = m.supplier||'';
+    document.getElementById('i-notes').value = m.notes||'';
+  } else {
+    ['i-sku','i-name','i-qty','i-threshold','i-location','i-price','i-notes'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('i-unit').value='pcs';
+    document.getElementById('i-cat').value='Hardware';
+    document.getElementById('i-supplier').value='';
+  }
+  openModal('modal-item');
+}
+
+function saveItem() {
+  const sku = document.getElementById('i-sku').value.trim();
+  const name = document.getElementById('i-name').value.trim();
+  const cat = document.getElementById('i-cat').value;
+  if (!sku||!name) { toast('Please fill SKU and Name.','error'); return; }
+  const item = {
+    id: editItemId||nextMatId++,
+    sku, name, category:cat,
+    quantity: parseInt(document.getElementById('i-qty').value)||0,
+    unit: document.getElementById('i-unit').value,
+    threshold: parseInt(document.getElementById('i-threshold').value)||0,
+    location: document.getElementById('i-location').value.trim(),
+    price: parseFloat(document.getElementById('i-price').value)||0,
+    supplier: document.getElementById('i-supplier').value,
+    notes: document.getElementById('i-notes').value.trim(),
+  };
+  if (editItemId) { materials = materials.map(m=>m.id===editItemId?item:m); toast('Material updated.','success'); }
+  else { materials.push(item); toast('Material added.','success'); }
+  saveData('materials',materials);
+  refreshCategoryFilter(); renderMaterials(); renderMatStats(); renderAlerts();
+  closeModal('modal-item');
+}
+
+function deleteMaterial(id) {
+  if (!confirm('Delete this material?')) return;
+  materials = materials.filter(m=>m.id!==id);
+  saveData('materials',materials);
+  refreshCategoryFilter(); renderMaterials(); renderMatStats(); renderAlerts();
+  toast('Material deleted.','');
+}
+
+// ══════════════════════════════════════════════════
+// FINISHED GOODS
+// ══════════════════════════════════════════════════
+let editFGId = null;
+
+function refreshFGFilters() {
+  const types = [...new Set(finishedGoods.map(f=>f.type))].sort();
+  document.getElementById('fg-filter-cat').innerHTML = '<option value="">All Types</option>' + types.map(t=>`<option>${t}</option>`).join('');
+}
+
+function refreshBOMDropdown(selectId) {
+  const el = document.getElementById(selectId);
+  el.innerHTML = '<option value="">— None —</option>' + boms.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+}
+
+function openFinishedModal(id=null) {
+  editFGId = id;
+  document.getElementById('fg-modal-title').textContent = id ? 'Edit Product' : 'Add Finished Product';
+  refreshBOMDropdown('fg-bom');
+  if (id) {
+    const f = finishedGoods.find(x=>x.id===id);
+    document.getElementById('fg-sku').value=f.sku;
+    document.getElementById('fg-type').value=f.type;
+    document.getElementById('fg-name').value=f.name;
+    document.getElementById('fg-qty').value=f.quantity;
+    document.getElementById('fg-price').value=f.price;
+    document.getElementById('fg-bom').value=f.bom||'';
+    document.getElementById('fg-desc').value=f.desc||'';
+  } else {
+    ['fg-sku','fg-name','fg-qty','fg-price','fg-desc'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('fg-bom').value='';
+  }
+  openModal('modal-fg');
+}
+
+function saveFG() {
+  const sku=document.getElementById('fg-sku').value.trim();
+  const name=document.getElementById('fg-name').value.trim();
+  if(!sku||!name){toast('Fill required fields.','error');return;}
+  const item = {
+    id:editFGId||nextFGId++, sku, name,
+    type:document.getElementById('fg-type').value,
+    quantity:parseInt(document.getElementById('fg-qty').value)||0,
+    price:parseFloat(document.getElementById('fg-price').value)||0,
+    bom:parseInt(document.getElementById('fg-bom').value)||0,
+    desc:document.getElementById('fg-desc').value.trim(),
+  };
+  if(editFGId) { finishedGoods=finishedGoods.map(f=>f.id===editFGId?item:f); toast('Product updated.','success'); }
+  else { finishedGoods.push(item); toast('Product added.','success'); }
+  saveData('finished',finishedGoods);
+  refreshFGFilters(); renderFinished();
+  closeModal('modal-fg');
+}
+
+function renderFinished() {
+  const q=(document.getElementById('fg-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('fg-filter-cat')?.value||'';
+  const data=finishedGoods.filter(f=>
+    (!q||f.name.toLowerCase().includes(q)||f.sku.toLowerCase().includes(q))&&(!cat||f.type===cat)
+  );
+  const tbody=document.getElementById('fg-tbody');
+  const empty=document.getElementById('fg-empty');
+  document.getElementById('fg-count-label').textContent=`${data.length} products`;
+  if(!data.length){tbody.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  tbody.innerHTML=data.map((f,i)=>{
+    const linkedBom=boms.find(b=>b.id===f.bom);
+    return `<tr style="animation-delay:${i*0.04}s">
+      <td class="item-sku">${f.sku}</td>
+      <td><div class="item-name">${f.name}</div>${f.desc?`<div class="item-sku">${f.desc.slice(0,50)}…</div>`:''}</td>
+      <td><span class="cat-chip">${f.type}</span></td>
+      <td><span class="badge ${f.quantity>0?'badge-ok':'badge-critical'}">${f.quantity} units</span></td>
+      <td style="font-family:var(--font-mono);font-size:.82rem">₹${f.price.toLocaleString('en-IN')}</td>
+      <td>${linkedBom?`<span class="badge badge-blue">${linkedBom.name.slice(0,28)}…</span>`:'<span style="color:var(--muted);font-size:.78rem">—</span>'}</td>
+      <td>
+        <div style="display:flex;gap:.35rem">
+          <button class="btn btn-outline btn-sm" onclick="openFinishedModal(${f.id})">Edit</button>
+          <button class="btn btn-danger-soft btn-sm" onclick="deleteFG(${f.id})">Del</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteFG(id) {
+  if(!confirm('Delete this product?'))return;
+  finishedGoods=finishedGoods.filter(f=>f.id!==id);
+  saveData('finished',finishedGoods);
+  refreshFGFilters(); renderFinished(); toast('Product deleted.');
+}
+
+// ══════════════════════════════════════════════════
+// BOM
+// ══════════════════════════════════════════════════
+let editBOMId = null;
+
+function openBOMModal(id=null) {
+  editBOMId=id;
+  document.getElementById('bom-modal-title').textContent=id?'Edit BOM':'New Bill of Materials';
+  document.getElementById('bom-items-list').innerHTML='';
+  if(id) {
+    const b=boms.find(x=>x.id===id);
+    document.getElementById('bom-name').value=b.name;
+    document.getElementById('bom-type').value=b.type||'';
+    document.getElementById('bom-dims').value=b.dims||'';
+    b.items.forEach(item=>addBOMRow(item));
+  } else {
+    ['bom-name','bom-type','bom-dims'].forEach(f=>document.getElementById(f).value='');
+    addBOMRow(); addBOMRow();
+  }
+  openModal('modal-bom');
+}
+
+function addBOMRow(item=null) {
+  const div=document.createElement('div');
+  div.className='bom-row';
+  const matOpts=materials.map(m=>`<option value="${m.sku}" data-name="${m.name}" ${item&&item.materialSku===m.sku?'selected':''}>${m.sku} — ${m.name}</option>`).join('');
+  div.innerHTML=`
+    <select class="form-select bom-mat" style="flex:2">${matOpts}</select>
+    <input class="form-input bom-qty" type="number" min="0.01" step="0.01" placeholder="Qty" value="${item?item.qty:''}">
+    <input class="form-input bom-unit" placeholder="Unit" value="${item?item.unit:'pcs'}">
+    <button class="bom-del" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('bom-items-list').appendChild(div);
+}
+
+function saveBOM() {
+  const name=document.getElementById('bom-name').value.trim();
+  if(!name){toast('BOM name is required.','error');return;}
+  const rows=[...document.querySelectorAll('#bom-items-list .bom-row')];
+  const items=rows.map(row=>{
+    const sel=row.querySelector('.bom-mat');
+    const mat=materials.find(m=>m.sku===sel.value);
+    return { materialSku:sel.value, materialName:mat?mat.name:'', qty:parseFloat(row.querySelector('.bom-qty').value)||0, unit:row.querySelector('.bom-unit').value||'pcs' };
+  }).filter(r=>r.qty>0);
+  const bom={id:editBOMId||nextBOMId++, name, type:document.getElementById('bom-type').value.trim(), dims:document.getElementById('bom-dims').value.trim(), items};
+  if(editBOMId) { boms=boms.map(b=>b.id===editBOMId?bom:b); toast('BOM updated.','success'); }
+  else { boms.push(bom); toast('BOM created.','success'); }
+  saveData('boms',boms);
+  renderBOMs(); closeModal('modal-bom');
+}
+
+function deleteBOM(id) {
+  if(!confirm('Delete this BOM?'))return;
+  boms=boms.filter(b=>b.id!==id);
+  saveData('boms',boms);
+  renderBOMs(); toast('BOM deleted.');
+}
+
+function renderBOMs() {
+  const q=(document.getElementById('bom-search')?.value||'').toLowerCase();
+  const data=boms.filter(b=>!q||b.name.toLowerCase().includes(q)||(b.type||'').toLowerCase().includes(q));
+  const container=document.getElementById('bom-list');
+  const empty=document.getElementById('bom-empty');
+  if(!data.length){container.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  container.innerHTML=data.map((b,i)=>`
+    <div class="table-card" style="margin-bottom:1rem;animation-delay:${i*0.05}s;animation:fadeUp .35s ease both">
+      <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem">
+        <div>
+          <div style="font-family:var(--font-serif);font-size:1.1rem">${b.name}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px">${b.type||''} ${b.dims?'· '+b.dims:''} · ${b.items.length} materials</div>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-outline btn-sm" onclick="openBOMModal(${b.id})">Edit</button>
+          <button class="btn btn-danger-soft btn-sm" onclick="deleteBOM(${b.id})">Delete</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>SKU</th><th>Material</th><th>Qty Required</th><th>Unit</th><th>In Stock</th><th>Status</th>
+          </tr></thead>
+          <tbody>
+            ${b.items.map(item=>{
+              const mat=materials.find(m=>m.sku===item.materialSku);
+              const available=mat?mat.quantity:0;
+              const enough=available>=item.qty;
+              return `<tr>
+                <td class="item-sku">${item.materialSku}</td>
+                <td style="font-size:.84rem">${item.materialName}</td>
+                <td style="font-family:var(--font-mono);font-size:.82rem;font-weight:600">${item.qty}</td>
+                <td style="font-family:var(--font-mono);font-size:.72rem;color:var(--muted)">${item.unit}</td>
+                <td style="font-family:var(--font-mono);font-size:.82rem">${available}</td>
+                <td><span class="badge ${enough?'badge-ok':'badge-critical'}">${enough?'Sufficient':'Shortage'}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// PRODUCTION ORDERS
+// ══════════════════════════════════════════════════
+function openOrderModal() {
+  ['ord-name','ord-notes'].forEach(f=>document.getElementById(f).value='');
+  document.getElementById('ord-qty').value=1;
+  document.getElementById('ord-status').value='pending';
+  document.getElementById('ord-date').value='';
+  const bomSel=document.getElementById('ord-bom');
+  bomSel.innerHTML='<option value="">— Select BOM —</option>'+boms.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+  openModal('modal-order');
+}
+
+function saveOrder() {
+  const name=document.getElementById('ord-name').value.trim();
+  const bomId=parseInt(document.getElementById('ord-bom').value);
+  if(!name){toast('Order name required.','error');return;}
+  const bom=boms.find(b=>b.id===bomId);
+  const order={
+    id:nextOrdId++, name, bom:bomId||0,
+    bomName:bom?bom.name:'—',
+    qty:parseInt(document.getElementById('ord-qty').value)||1,
+    date:document.getElementById('ord-date').value,
+    status:document.getElementById('ord-status').value,
+    notes:document.getElementById('ord-notes').value.trim(),
+  };
+  orders.push(order);
+  saveData('orders',orders);
+  renderOrders(); closeModal('modal-order'); toast('Production order created.','success');
+}
+
+function updateOrderStatus(id, status) {
+  orders=orders.map(o=>o.id===id?{...o,status}:o);
+  saveData('orders',orders); renderOrders();
+}
+
+function deleteOrder(id) {
+  if(!confirm('Delete this order?'))return;
+  orders=orders.filter(o=>o.id!==id);
+  saveData('orders',orders); renderOrders(); toast('Order deleted.');
+}
+
+function filterOrders(status, el) {
+  orderFilter=status;
+  document.querySelectorAll('#page-orders .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders();
+}
+
+function renderOrders() {
+  const data=orders.filter(o=>orderFilter==='all'||o.status===orderFilter)
+    .sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const container=document.getElementById('order-list');
+  const empty=document.getElementById('order-empty');
+  if(!data.length){container.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  const statusColors={pending:'badge-orange','in-progress':'badge-blue',completed:'badge-ok'};
+  const statusLabels={pending:'Pending','in-progress':'In Progress',completed:'Completed'};
+  container.innerHTML=data.map((o,i)=>{
+    const bom=boms.find(b=>b.id===o.bom);
+    return `<div class="order-card" style="animation-delay:${i*0.05}s">
+      <div class="order-header">
+        <div>
+          <div class="order-title">${o.name}</div>
+          <div class="order-meta">BOM: ${o.bomName} · Qty: ${o.qty} unit(s) ${o.date?'· Target: '+new Date(o.date).toLocaleDateString('en-IN'):''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
+          <span class="badge ${statusColors[o.status]}">${statusLabels[o.status]}</span>
+          <div style="display:flex;gap:.35rem;flex-wrap:wrap">
+            ${o.status!=='in-progress'?`<button class="btn btn-outline btn-sm" onclick="updateOrderStatus(${o.id},'in-progress')">Start</button>`:''}
+            ${o.status!=='completed'?`<button class="btn btn-success btn-sm" onclick="updateOrderStatus(${o.id},'completed')">Complete</button>`:''}
+            <button class="btn btn-danger-soft btn-sm" onclick="deleteOrder(${o.id})">Delete</button>
+          </div>
+        </div>
+      </div>
+      ${o.notes?`<div style="font-size:.8rem;color:var(--text2);background:var(--surface2);padding:.5rem .75rem;border-radius:4px;border-left:3px solid var(--border2)">${o.notes}</div>`:''}
+      ${bom?`<div class="order-materials">${bom.items.map(it=>`<span class="material-tag">${it.materialSku}: ${it.qty*o.qty} ${it.unit}</span>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// SUPPLIERS
+// ══════════════════════════════════════════════════
+let editSupId=null;
+
+function openSupplierModal(id=null) {
+  editSupId=id;
+  document.getElementById('sup-modal-title').textContent=id?'Edit Supplier':'Add Supplier';
+  if(id) {
+    const s=suppliers.find(x=>x.id===id);
+    document.getElementById('s-name').value=s.name;
+    document.getElementById('s-contact').value=s.contact||'';
+    document.getElementById('s-phone').value=s.phone||'';
+    document.getElementById('s-email').value=s.email||'';
+    document.getElementById('s-city').value=s.city||'';
+    document.getElementById('s-materials').value=s.materials||'';
+    document.getElementById('s-notes').value=s.notes||'';
+  } else {
+    ['s-name','s-contact','s-phone','s-email','s-city','s-materials','s-notes'].forEach(f=>document.getElementById(f).value='');
+  }
+  openModal('modal-supplier');
+}
+
+function saveSupplier() {
+  const name=document.getElementById('s-name').value.trim();
+  if(!name){toast('Supplier name required.','error');return;}
+  const sup={
+    id:editSupId||nextSupId++, name,
+    contact:document.getElementById('s-contact').value.trim(),
+    phone:document.getElementById('s-phone').value.trim(),
+    email:document.getElementById('s-email').value.trim(),
+    city:document.getElementById('s-city').value.trim(),
+    materials:document.getElementById('s-materials').value.trim(),
+    notes:document.getElementById('s-notes').value.trim(),
+  };
+  if(editSupId){suppliers=suppliers.map(s=>s.id===editSupId?sup:s);toast('Supplier updated.','success');}
+  else{suppliers.push(sup);toast('Supplier added.','success');}
+  saveData('suppliers',suppliers);
+  refreshSupplierDropdown(); renderSuppliers(); closeModal('modal-supplier');
+}
+
+function deleteSupplier(id) {
+  if(!confirm('Delete this supplier?'))return;
+  suppliers=suppliers.filter(s=>s.id!==id);
+  saveData('suppliers',suppliers);
+  renderSuppliers(); toast('Supplier deleted.');
+}
+
+function renderSuppliers() {
+  const q=(document.getElementById('sup-search')?.value||'').toLowerCase();
+  const data=suppliers.filter(s=>!q||s.name.toLowerCase().includes(q)||(s.city||'').toLowerCase().includes(q)||(s.materials||'').toLowerCase().includes(q));
+  const grid=document.getElementById('suppliers-grid');
+  const empty=document.getElementById('sup-empty');
+  if(!data.length){grid.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  grid.innerHTML=data.map((s,i)=>`
+    <div class="supplier-card" style="animation-delay:${i*0.05}s">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.75rem">
+        <div class="supplier-name">${s.name}</div>
+        <div style="display:flex;gap:.35rem">
+          <button class="btn btn-outline btn-sm" onclick="openSupplierModal(${s.id})">Edit</button>
+          <button class="btn btn-danger-soft btn-sm" onclick="deleteSupplier(${s.id})">Del</button>
+        </div>
+      </div>
+      <div class="supplier-meta">
+        ${s.city?`<span>📍 ${s.city}</span>`:''}
+        ${s.phone?`<span>📞 ${s.phone}</span>`:''}
+        ${s.email?`<span>✉️ ${s.email}</span>`:''}
+        ${s.contact?`<span>👤 ${s.contact}</span>`:''}
+      </div>
+      ${s.materials?`<div style="margin-top:.75rem"><div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Supplies</div><div style="font-size:.8rem;color:var(--text2)">${s.materials}</div></div>`:''}
+      ${s.notes?`<div style="font-size:.76rem;color:var(--muted);margin-top:.6rem;border-top:1px solid var(--border);padding-top:.6rem">${s.notes}</div>`:''}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// ALERTS
+// ══════════════════════════════════════════════════
+function renderAlerts() {
+  const critical=materials.filter(m=>getStatus(m)==='critical').sort((a,b)=>a.quantity-b.quantity);
+  const low=materials.filter(m=>getStatus(m)==='low').sort((a,b)=>a.quantity-b.quantity);
+  const container=document.getElementById('alerts-container');
+  if(!critical.length&&!low.length) {
+    container.innerHTML=`<div class="alert-card ok"><div class="alert-left"><div class="alert-icon">✅</div><div><div class="alert-name">All stock levels are healthy</div><div class="alert-detail">No materials require attention at this time.</div></div></div></div>`;
+    return;
+  }
+  const renderGroup=(items,type,label)=>items.length?`
+    <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:${type==='critical'?'var(--danger)':'var(--warn)'};margin:1.25rem 0 .6rem">${label} (${items.length})</div>
+    ${items.map((m,i)=>`<div class="alert-card ${type==='low'?'warn':''}" style="animation-delay:${i*0.04}s">
+      <div class="alert-left">
+        <div class="alert-icon">${type==='critical'?'🚨':'⚠️'}</div>
+        <div>
+          <div class="alert-name">${m.name}</div>
+          <div class="alert-detail">${m.sku} · ${m.category} · Location: ${m.location||'—'}</div>
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--font-mono);font-size:.9rem;font-weight:600;color:${type==='critical'?'var(--danger)':'var(--warn)'}">${m.quantity} ${m.unit||'pcs'}</div>
+        <div style="font-size:.7rem;color:var(--muted)">Min: ${m.threshold||0} · Supplier: ${m.supplier||'—'}</div>
+      </div>
+    </div>`).join('')}` : '';
+  container.innerHTML=renderGroup(critical,'critical','🚨 Critical — Immediate Reorder') + renderGroup(low,'low','⚠️ Low Stock — Reorder Soon');
+}
+
+// ══════════════════════════════════════════════════
+// REPORTS
+// ══════════════════════════════════════════════════
+function renderReports() {
+  const catTotals={};
+  materials.forEach(m=>{catTotals[m.category]=(catTotals[m.category]||0)+m.quantity*(m.price||0);});
+  const catEntries=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const maxVal=Math.max(...catEntries.map(c=>c[1]),1);
+  const colors=['#c0622a','#2a6b4a','#1d4ed8','#b45309','#7c3aed','#be185d','#065f46'];
+
+  const critical=materials.filter(m=>getStatus(m)==='critical').length;
+  const low=materials.filter(m=>getStatus(m)==='low').length;
+  const ok=materials.filter(m=>getStatus(m)==='ok').length;
+  const total=materials.length||1;
+  const totalVal=materials.reduce((s,m)=>s+(m.quantity*(m.price||0)),0);
+
+  // Donut
+  const donutData=[{label:'In Stock',count:ok,color:'#2a6b4a'},{label:'Low Stock',count:low,color:'#b45309'},{label:'Critical',count:critical,color:'#991b1b'}];
+  let cumAngle=0;
+  const R=52, cx=65, cy=65;
+  const pA=(angle,radius)=>{const a=(angle-90)*Math.PI/180;return[cx+radius*Math.cos(a),cy+radius*Math.sin(a)];};
+  const paths=donutData.map(d=>{
+    const pct=d.count/total; const angle=pct*360;
+    const sa=cumAngle; cumAngle+=angle;
+    if(angle===0)return'';
+    const large=angle>180?1:0;
+    const[x1,y1]=pA(sa,R);const[x2,y2]=pA(cumAngle,R);
+    const[xi1,yi1]=pA(sa,30);const[xi2,yi2]=pA(cumAngle,30);
+    return `<path d="M${x1},${y1}A${R},${R} 0 ${large},1 ${x2},${y2}L${xi2},${yi2}A30,30 0 ${large},0 ${xi1},${yi1}Z" fill="${d.color}" opacity=".85"/>`;
+  }).join('');
+
+  document.getElementById('reports-grid').innerHTML=`
+    <div class="chart-card">
+      <div class="chart-title">Stock Value by Category (₹)</div>
+      <div class="bar-chart-h">
+        ${catEntries.map(([cat,val],i)=>`
+          <div class="bar-h-row">
+            <div class="bar-h-label" title="${cat}">${cat.length>16?cat.slice(0,14)+'…':cat}</div>
+            <div class="bar-h-bg"><div class="bar-h-fill" style="width:${Math.round(val/maxVal*100)}%;background:${colors[i%colors.length]}">₹${(val/1000).toFixed(0)}K</div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Stock Status Distribution</div>
+      <div class="donut-wrap">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          ${paths}
+          <text x="65" y="61" text-anchor="middle" fill="${'#1a1714'}" font-size="18" font-family="DM Serif Display" font-weight="700">${total}</text>
+          <text x="65" y="76" text-anchor="middle" fill="${'#8a837a'}" font-size="9" font-family="DM Mono">MATERIALS</text>
+        </svg>
+        <div class="legend">
+          ${donutData.map(d=>`<div class="legend-item"><div class="legend-color" style="background:${d.color}"></div><div class="legend-name">${d.label}</div><div class="legend-count">${d.count}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Inventory Summary</div>
+      <div class="summary-row"><span class="summary-key">Total Unique SKUs</span><span class="summary-val">${materials.length}</span></div>
+      <div class="summary-row"><span class="summary-key">Total Stock Value</span><span class="summary-val">₹${totalVal.toLocaleString('en-IN')}</span></div>
+      <div class="summary-row"><span class="summary-key">Active Suppliers</span><span class="summary-val">${suppliers.length}</span></div>
+      <div class="summary-row"><span class="summary-key">BOMs Created</span><span class="summary-val">${boms.length}</span></div>
+      <div class="summary-row"><span class="summary-key">Production Orders</span><span class="summary-val">${orders.length}</span></div>
+      <div class="summary-row"><span class="summary-key">Pending Orders</span><span class="summary-val">${orders.filter(o=>o.status==='pending').length}</span></div>
+      <div class="summary-row"><span class="summary-key">In-Progress Orders</span><span class="summary-val">${orders.filter(o=>o.status==='in-progress').length}</span></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Critical & Low Stock Items</div>
+      ${[...materials].filter(m=>getStatus(m)!=='ok').sort((a,b)=>a.quantity-b.quantity).slice(0,8).map(m=>`
+        <div class="summary-row">
+          <span class="summary-key" style="font-size:.8rem">${m.name.length>28?m.name.slice(0,26)+'…':m.name}</span>
+          <span class="badge badge-${getStatus(m)}" style="font-size:.65rem">${m.quantity} ${m.unit||'pcs'}</span>
+        </div>`).join('')}
+      ${materials.filter(m=>getStatus(m)!=='ok').length===0?'<div style="text-align:center;padding:1.5rem;color:var(--success);font-size:.85rem">✓ No stock issues</div>':''}
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════
+// EXPORT CSV
+// ══════════════════════════════════════════════════
+function exportCSV() {
+  const headers=['SKU','Name','Category','Quantity','Unit','Min Threshold','Location','Unit Price (INR)','Supplier','Status'];
+  const rows=materials.map(m=>[m.sku,m.name,m.category,m.quantity,m.unit||'pcs',m.threshold||0,m.location||'',m.price||0,m.supplier||'',statusLabel[getStatus(m)]]);
+  const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='forma_materials_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('CSV exported.','success');
+}
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page-section').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    if(el.textContent.trim().toLowerCase().startsWith(name.replace('-',' ').split(' ')[0])) el.classList.add('active');
+  });
+  if(name==='reports') renderReports();
+  if(name==='alerts') renderAlerts();
+}
+
+// Sidebar nav precise matching
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+
+// ══════════════════════════════════════════════════
+// CLOCK & DATE
+// ══════════════════════════════════════════════════
+function updateClock() {
+  const now=new Date();
+  document.getElementById('hdr-clock').textContent=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  document.getElementById('sb-date').textContent=now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+setInterval(updateClock,1000); updateClock();
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+refreshCategoryFilter();
+refreshSupplierDropdown();
+refreshFGFilters();
+renderMatStats();
+renderMaterials();
+renderFinished();
+renderBOMs();
+renderOrders();
+renderSuppliers();
+renderAlerts();
+</script>
+</body>
+</html>
